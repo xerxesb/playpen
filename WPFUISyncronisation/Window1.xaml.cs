@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -25,18 +26,39 @@ namespace WPFUISyncronisation {
             InitializeComponent();
         }
 
-    	private void PerformIt(object sender, RoutedEventArgs e)
+		BackgroundWorker worker = new BackgroundWorker();
+		
+		private void PerformIt(object sender, RoutedEventArgs e)
         {
-            var threadedObject = new ThreadedObject(MethodWhichCallsSomeObject);
-
-            var t = new Thread(threadedObject.DoSomethingThreadedly);
-            t.Start();
+			//var threadedObject = new ThreadedObject(MethodWhichCallsSomeObject);
+			//var t = new Thread(threadedObject.DoSomethingThreadedly);
+			//t.Start();
+			worker.DoWork += worker_DoWork;
+			worker.ProgressChanged += worker_ProgressChanged;
+			worker.RunWorkerCompleted += (o, e1) => { };
+			worker.WorkerReportsProgress = true;
+			if (!worker.IsBusy) 
+				worker.RunWorkerAsync();
 //			threadedObject.DoSomethingThreadedly();
         }
 
+		void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+		{
+			Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => progress1.Value += 1));
+		}
+
+		void worker_DoWork(object sender, DoWorkEventArgs e)
+		{
+			var threadedObject = new ThreadedObject(MethodWhichCallsSomeObject);
+			threadedObject.DoSomethingThreadedly();
+		}
+
+    	private int i = 0;
         private void MethodWhichCallsSomeObject()
         {
-        	Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => progress1.Value += 1));
+        	i++;
+			worker.ReportProgress(i);
+//        	Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => progress1.Value += 1));
         }
 	}
 
@@ -54,6 +76,7 @@ namespace WPFUISyncronisation {
 			for (var i = 0; i < 2; i++)
 			{
 				Thread.Sleep(2000);
+
 				_methodWhichCallsSomeObject();
 			}
 		}
