@@ -30,26 +30,25 @@ namespace WPFUISyncronisation {
 		
 		private void PerformIt(object sender, RoutedEventArgs e)
         {
-			//var threadedObject = new ThreadedObject(MethodWhichCallsSomeObject);
-			//var t = new Thread(threadedObject.DoSomethingThreadedly);
-			//t.Start();
 			worker.DoWork += worker_DoWork;
 			worker.ProgressChanged += worker_ProgressChanged;
 			worker.RunWorkerCompleted += (o, e1) => { };
 			worker.WorkerReportsProgress = true;
 			if (!worker.IsBusy) 
 				worker.RunWorkerAsync();
-//			threadedObject.DoSomethingThreadedly();
         }
 
 		void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
-			Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => progress1.Value += 1));
+		    progress1.Value += 1;
+		    statusBar1.Items.Add(progress1.Value);
+            // dont need this!
+//			Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => progress1.Value += 1));
 		}
 
 		void worker_DoWork(object sender, DoWorkEventArgs e)
 		{
-			var threadedObject = new ThreadedObject(MethodWhichCallsSomeObject);
+			var threadedObject = new MyWorker(MethodWhichCallsSomeObject);
 			threadedObject.DoSomethingThreadedly();
 		}
 
@@ -58,17 +57,16 @@ namespace WPFUISyncronisation {
         {
         	i++;
 			worker.ReportProgress(i);
-//        	Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => progress1.Value += 1));
         }
 	}
 
-	public class ThreadedObject
+	public class MyWorker
 	{
-		private readonly Action _methodWhichCallsSomeObject;
+		private readonly Action _progressHasChangedMethod;
 
-		public ThreadedObject(Action methodWhichCallsSomeObject)
+		public MyWorker(Action progressHasChangedMethod)
 		{
-			_methodWhichCallsSomeObject = methodWhichCallsSomeObject;
+			_progressHasChangedMethod = progressHasChangedMethod;
 		}
 
 		public void DoSomethingThreadedly()
@@ -77,7 +75,7 @@ namespace WPFUISyncronisation {
 			{
 				Thread.Sleep(2000);
 
-				_methodWhichCallsSomeObject();
+				_progressHasChangedMethod();
 			}
 		}
 	}

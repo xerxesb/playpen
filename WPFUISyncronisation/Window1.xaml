@@ -4,6 +4,7 @@
     Title="Window1" Height="300" Width="300">
     <StackPanel Orientation="Vertical">
 			<Button Name="blah" Click="PerformIt">Do it</Button>
-			<ProgressBar Name="progress1" Minimum="0" Maximum="3" Value="0" Height="30"/>
+            <ProgressBar Name="progress1" Minimum="0" Maximum="3" Value="0" Height="30"/>
+            <StatusBar Name="statusBar1"></StatusBar>
     </StackPanel>
 </Window>
